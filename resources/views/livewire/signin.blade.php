@@ -9,14 +9,15 @@
                 <h1 class="text-white poppins-bold text-[20px]">Signin</h1>
             </div>
             <div class="w-[40%] h-[50%] bg-white flex justify-center items-center rounded-e-[10px]">
-                <form action="" class="myContainer">
+                <form  method="POST" action="{{ route('login') }}" class="myContainer">
+                    @csrf
                     <div class="flex flex-col my-[20px] gap-[10px]">
                         <label for="">Email</label>
-                        <input type="email" name="" id="" placeholder="email" class="rounded-[10px]">
+                        <input type="email" name="email" id="" placeholder="email" class="rounded-[10px]">
                     </div>
                     <div class="flex flex-col my-[20px] gap-[10px]">
                         <label for="">Password</label>
-                        <input type="email" name="" id="" placeholder="password" class="rounded-[10px]">
+                        <input type="password" name="password" id="" placeholder="password" class="rounded-[10px]">
                     </div>
                     <div class="flex items-center gap-[10px] my-[20px]">
                         <input type="checkbox" name="" id="" placeholder="password" class="rounded-[5px]">

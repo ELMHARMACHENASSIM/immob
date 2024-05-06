@@ -17,18 +17,20 @@
                                 service, we
                                 make finding your dream home easy and enjoyable. Start your search with us today.</p>
                             <div
-                                class="w-[auto] flex justify-center items-start flex-col gap-[25px] bg-white rounded-[10px] p-[20px] ">
+                                class="w-[auto] flex justify-center items-start flex-col gap-[25px] {{ $darkmode ? ' bg-dark' : ' bg-white' }} rounded-[10px] p-[20px] ">
 
                                 <form action="" class="w-[100%] h-[40px] flex  items-center  gap-[15px]">
                                     <input type="text" name="firstname" id="firstname" placeholder="Search"
-                                        class="h-[100%] rounded-[10px]">
-                                    <select name="" id="" class="h-[100%] rounded-[10px]">
+                                        class="h-[100%] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
+                                    <select name="" id=""
+                                        class="h-[100%] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
                                         <option value="" disabled selected>City</option>
                                         <option value="">Casablanca</option>
                                         <option value="">Rabat</option>
                                         <option value="">Tanger</option>
                                     </select>
-                                    <select name="" id="" class="h-[100%] rounded-[10px]">
+                                    <select name="" id=""
+                                        class="h-[100%] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
                                         <option value="" disabled selected>Type of immo</option>
                                         <option value="">Dar</option>
                                         <option value="">Partma</option>
@@ -38,12 +40,14 @@
                                     <div class="flex items-center gap-[10px] h-[100%]">
                                         <span>price : </span>
                                         <input type="number" name="firstname" id="firstname" placeholder="min"
-                                            class="h-[100%] w-[100px] rounded-[10px]"> - <input type="number" name="firstname"
-                                            id="firstname" placeholder="max" class="h-[100%] w-[100px] rounded-[10px]">
+                                            class="h-[100%] w-[100px] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
+                                        - <input type="number" name="firstname" id="firstname" placeholder="max"
+                                            class="h-[100%] w-[100px] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
 
                                     </div>
                                     <div class="h-[100%] ">
-                                        <button class="bg-[black] h-[100%] w-[50px] rounded-[10px]"><i
+                                        <button
+                                            class=" {{ $darkmode ? 'bg-grey' : 'bg-dark' }} h-[100%] w-[50px] rounded-[10px]"><i
                                                 class="fa-solid fa-magnifying-glass text-white"></i></button>
                                     </div>
                                 </form>
@@ -57,18 +61,99 @@
     </section>
     <section class="my-[50px] w-[100%] h-[100%]">
         <div class="myContainer flex justify-center items-start gap-[20px]">
-            <div class="myContainer w-[20%] bg-[#f1f0f0] rounded-[10px] ">
-                <form action="" class=" h-[100%] flex  flex-col gap-[25px] my-[30px] ">
+            <div class="myContainer w-[20%]  {{ $darkmode ? 'bg-dark' : 'bg-[#f1f0f0]' }} rounded-[10px] ">
+                <form action="" class=" h-[100%] flex  flex-col gap-[25px] my-[30px]  ">
                     <h1>category</h1>
-                    <div class="bg-white flex justify-between items-center h-[40px] w-[100%] relative rounded-[10px]">
-                        <input type="text" placeholder="Location" class="border-none h-[100%] w-[100%] p-[5x] rounded-[10px]">
-                        <span class="absolute  right-[10px] h-[100%]  flex justify-center items-center"><i
+                    <div
+                        class=" {{ $darkmode ? 'bg-grey' : 'bg-white' }} flex justify-between items-center h-[40px] w-[100%] relative rounded-[10px]">
+                        <input type="text" placeholder="Location" id="locationInput"
+                            class="border-none h-[100%] w-[100%] p-[5x] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
+                        <span id="getLocationBtn"
+                            class="absolute  right-[10px] h-[100%]  flex justify-center items-center"><i
                                 class="fa-solid fa-location-crosshairs cursor-pointer"></i></span>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                document.getElementById("getLocationBtn").addEventListener("click", getLocation);
+                            });
+
+                            function getLocation() {
+                                if (navigator.geolocation) {
+                                    navigator.geolocation.getCurrentPosition(showPosition);
+                                } else {
+                                    alert("Geolocation is not supported by this browser.");
+                                }
+                            }
+
+                            function showPosition(position) {
+                                var latitude = position.coords.latitude;
+                                var longitude = position.coords.longitude;
+
+                                // Construct the location string
+                                var locationString = "Latitude: " + latitude + ", Longitude: " + longitude;
+
+                                // Set the location string to the input field
+                                document.getElementById("locationInput").value = locationString;
+                            }
+
+                            function extractCityStreet(address) {
+                                var city = "";
+                                var street = "";
+
+                                // Split the address into components
+                                var addressComponents = address.split(',');
+
+                                // Extract city and street components
+                                if (addressComponents.length >= 4) {
+                                    city = addressComponents[addressComponents.length - 3].trim();
+                                    street = addressComponents[0].trim();
+                                } else if (addressComponents.length >= 3) {
+                                    city = addressComponents[addressComponents.length - 2].trim();
+                                    street = addressComponents[0].trim();
+                                }
+
+                                return {
+                                    city: city,
+                                    street: street
+                                };
+                            }
+
+                            function reverseGeocode(latitude, longitude) {
+                                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.display_name) {
+                                            var {
+                                                city,
+                                                street
+                                            } = extractCityStreet(data.display_name);
+                                            document.getElementById("locationInput").value = `${city}, ${street}`;
+                                        } else {
+                                            console.log("No address found for the given coordinates.");
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error("Error fetching address:", error);
+                                    });
+                            }
+
+                            function showPosition(position) {
+                                var latitude = position.coords.latitude;
+                                var longitude = position.coords.longitude;
+
+                                reverseGeocode(latitude, longitude);
+                            }
+                        </script>
+                        
                     </div>
+                    <input type="text" placeholder="street" id="locationInput"
+                    class="border-none h-[100%] w-[100%] p-[5x] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
                     <div class="flex flex-col gap-[15px]">
                         <span>Range: <span id="rangeValue">m&#178;</span></span>
                         <input type="range" name="rangeInput" id="rangeInput" min="30" max="800"
-                            step="10" oninput="updateRangeValue(this.value)">
+                            step="10" oninput="updateRangeValue(this.value)"
+                            class="w-full h-[2px] {{ $darkmode ? 'bg-grey' : 'bg-dark' }} opacity-100 outline-none transition-opacity duration-200 appearance-none " />
+
+
                         <script>
                             function updateRangeValue(value) {
                                 document.getElementById("rangeValue").innerText = value + " m²";
@@ -89,50 +174,59 @@
                             });
                         </script>
                     </div>
-                    <select name="" id="" class="h-[100%] w-[100%] rounded-[10px]">
+                    <select name="" id=""
+                        class="h-[100%] w-[100%] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
                         <option value="" disabled selected>All Statut</option>
                         <option value="">Casablanca</option>
                         <option value="">Rabat</option>
                         <option value="">Tanger</option>
                     </select>
-                    <select name="" id="" class="h-[100%] w-[100%] rounded-[10px]">
+                    <select name="" id=""
+                        class="h-[100%] w-[100%] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
                         <option value="" disabled selected>Rooms</option>
                         <option value="">Casablanca</option>
                         <option value="">Rabat</option>
                         <option value="">Tanger</option>
                     </select>
-                    <select name="" id="" class="h-[100%] w-[100%] rounded-[10px]">
+                    <select name="" id=""
+                        class="h-[100%] w-[100%] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
                         <option value="" disabled selected>type of home</option>
                         <option value="">Casablanca</option>
                         <option value="">Rabat</option>
                         <option value="">Tanger</option>
                     </select>
-                    <select name="" id="" class="h-[100%] w-[100%] rounded-[10px]">
+                    <select name="" id=""
+                        class="h-[100%] w-[100%] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
                         <option value="" disabled selected>beds</option>
                         <option value="">Casablanca</option>
                         <option value="">Rabat</option>
                         <option value="">Tanger</option>
                     </select>
-                    <select name="" id="" class="h-[100%] w-[100%] rounded-[10px]">
+                    <select name="" id=""
+                        class="h-[100%] w-[100%] rounded-[10px] {{ $darkmode ? 'bg-grey' : 'bg-white' }}">
                         <option value="" disabled selected>Garage</option>
                         <option value="">Casablanca</option>
                         <option value="">Rabat</option>
                         <option value="">Tanger</option>
                     </select>
                     <div class="flex items-center gap-[10px] ">
-                        <input type="checkbox" name="" id="" class="text-black focus:hidden rounded-[5px]">
-                        <span>lorem ipsum</span>
+                        <input type="checkbox" name="che" id="che"
+                            class="{{ $darkmode ? 'text-grey' : 'text-dark' }} focus:hidden rounded-[5px]">
+                        <label for="che">lorem ipsum</label>
                     </div>
                     <div class="flex items-center gap-[10px]">
-                        <input type="checkbox" name="" id="" class="text-black focus:hidden rounded-[5px]">
-                        <span>lorem ipsum</span>
+                        <input type="checkbox" name="check" id="check"
+                            class="{{ $darkmode ? 'text-grey' : 'text-dark' }} focus:hidden rounded-[5px]">
+                        <label for="check">lorem ipsum</label>
                     </div>
                     <div class="flex items-center gap-[10px]">
-                        <input type="checkbox" name="" id="" class="text-black focus:hidden rounded-[5px]">
-                        <span>lorem ipsum</span>
+                        <input type="checkbox" name="c" id="c"
+                            class="{{ $darkmode ? 'text-grey' : 'text-dark' }} focus:hidden rounded-[5px]">
+                        <label for="c">lorem ipsum</label>
                     </div>
                     <div class="flex  items-center gap-[20px] ">
-                        <button class="bg-black text-white w-[60%] p-[10px] rounded-[10px]">Apply</button>
+                        <button
+                            class="  {{ $darkmode ? 'bg-grey text-white' : 'bg-black text-white' }}   w-[60%] p-[10px] rounded-[10px]">Apply</button>
                         <span class="underline cursor-pointer">Reset</span>
 
                     </div>
@@ -140,11 +234,14 @@
 
             </div>
             <div class="w-[80%]">
-                <div class="grid grid-cols-3 gap-[20px] ">
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                <div class="grid grid-cols-4 gap-[20px] ">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -198,7 +295,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -206,10 +304,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -263,7 +364,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -271,10 +373,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -328,7 +433,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -336,11 +442,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -394,7 +502,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -402,11 +511,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -460,7 +571,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -468,11 +580,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -526,7 +640,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -534,11 +649,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -592,7 +709,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -600,11 +718,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -658,7 +778,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -666,11 +787,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -724,7 +847,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -732,11 +856,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -790,7 +916,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -798,11 +925,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -856,7 +985,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -864,11 +994,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -922,7 +1054,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -930,11 +1063,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -988,7 +1123,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -996,11 +1132,13 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
-                    <div class="w-[100%] h-[100%] relative border-[#00000034] border-[1px] rounded-[10px]">
+                    <div
+                        class="w-[100%] h-[100%] relative {{ $darkmode ? 'border-grey' : 'border-dark' }} border-[1px] rounded-[10px]">
                         <div class="absolute top-[10px] left-[10px] z-[100] flex gap-[10px] ">
-                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR SALE</span>
-                            <span class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
+                            <span class="text-white poppins-regular text-[12px] bg-[#000000] p-[5px] rounded-[5px]">FOR
+                                SALE</span>
+                            <span
+                                class="text-black poppins-regular text-[12px] bg-[#E7C873] p-[5px] rounded-[5px]">FEATURED</span>
                         </div>
                         {{-- slide --}}
                         <div id="indicators-carousel" class="relative w-[100%] h-[250px] " data-carousel="static">
@@ -1054,7 +1192,8 @@
 
                         </div>
                         {{-- header title --}}
-                        <div class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
+                        <div
+                            class="w-[100%] h-[100%] mt-[20px] flex justify-start items-start flex-col gap-[5px] p-[10px]">
                             <h1 class="poppins-semibold text-[20px]">Eaton Garth Penthouse</h1>
                             <span>Category : partma</span>
                             <span class="poppins-regular"><i class="fa-solid fa-location-dot "></i> Hay moulay rachid
@@ -1062,7 +1201,7 @@
                             <h3 class="poppins-bold text-[20px]">$230.000</h3>
                         </div>
                     </div>
-             
+
 
                 </div>
             </div>

@@ -2,12 +2,14 @@
 
 namespace App\Livewire;
 
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Chat extends Component
 {
     public function render()
     {
-        return view('livewire.chat');
+        $darkmode = Auth::user()->darkmode;
+        return view('livewire.chat' , compact('darkmode'));
     }
 }
